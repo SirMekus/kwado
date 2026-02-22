@@ -1,6 +1,6 @@
 {
   "name": "@sirmekus/kwado",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Unify Zod validation, react-hook-form, and oku HTTP submission in one hook — with an extensible response-handler pipeline.",
   "keywords": [
     "react",
@@ -32,9 +32,10 @@
     "node": ">=18"
   },
   "scripts": {
-    "build":     "tsup",
-    "dev":       "tsup --watch",
-    "typecheck": "tsc --noEmit"
+    "build":           "tsup",
+    "dev":             "tsup --watch",
+    "typecheck":       "tsc --noEmit",
+    "prepublishOnly":  "npm run typecheck && npm run build"
   },
   "peerDependencies": {
     "@hookform/resolvers": ">=3.0.0",

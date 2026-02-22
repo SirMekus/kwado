@@ -78,7 +78,7 @@ That is **five distinct wiring steps** repeated on every form. The branching log
 ## The same form with `kwado`
 
 ```tsx
-import { useZodForm, whenStatusCode, whenSuccess, whenError } from '@sirmekus/kwado';
+import { useForm, whenStatusCode, whenSuccess, whenError } from '@sirmekus/kwado';
 import { z } from 'zod';
 
 const loginSchema = z.object({
@@ -87,12 +87,12 @@ const loginSchema = z.object({
 });
 
 function LoginForm() {
-  const { register, onSubmit, formState: { errors, isSubmitting } } = useZodForm(
+  const { register, onSubmit, formState: { errors, isSubmitting } } = useForm(
     loginSchema,
     {
-      endpoint: '/api/auth/login',
+      endpoint: '/api/login',
       responseHandlers: [
-        whenStatusCode(422, (res, { setError }) => applyLaravelErrors(res.data, setError)),
+        whenStatusCode(422, (res, { setError }) => doSomething(res.data, setError)),
         whenSuccess((res) => { toast.success(res.data.message); router.push('/dashboard'); }),
         whenError((res)   => toast.error(res.data?.message ?? 'Login failed')),
       ],
@@ -144,7 +144,7 @@ npm install zod react-hook-form @hookform/resolvers @sirmekus/oku
 ## Quick start
 
 ```tsx
-import { useZodForm, whenSuccess, whenError } from '@sirmekus/kwado';
+import { useForm, whenSuccess, whenError } from '@sirmekus/kwado';
 import { z } from 'zod';
 
 const contactSchema = z.object({
@@ -154,7 +154,7 @@ const contactSchema = z.object({
 });
 
 function ContactForm() {
-  const { register, onSubmit, formState: { errors, isSubmitting } } = useZodForm(
+  const { register, onSubmit, formState: { errors, isSubmitting } } = useForm(
     contactSchema,
     {
       endpoint: '/api/contact',
@@ -290,12 +290,12 @@ responseHandlers: [
 
 ---
 
-## `useZodForm` API reference
+## `useForm` API reference
 
 ```ts
-function useZodForm<T extends ZodRawShape>(
+function useForm<T extends ZodRawShape>(
   schema:  ZodObject<T>,
-  options: UseZodFormOptions<z.infer<ZodObject<T>>>,
+  options: UseFormOptions<z.infer<ZodObject<T>>>,
 )
 ```
 
@@ -317,7 +317,7 @@ function useZodForm<T extends ZodRawShape>(
 
 ### Return value
 
-`useZodForm` spreads the entire return value of react-hook-form's `useForm` onto its own return object, so **every function and property that `useForm` exposes is available directly** from `useZodForm` — no secondary form reference needed.
+`useForm` spreads the entire return value of react-hook-form's `useForm` onto its own return object, so **every function and property that `useForm` exposes is available directly** from `useForm` — no secondary form reference needed.
 
 #### react-hook-form surface (all available, unchanged)
 
@@ -354,12 +354,12 @@ const {
   trigger,
   setFocus,
   formState: { errors, isSubmitting, isValid, isDirty },
-  onSubmit,   // ← added by useZodForm
-  helpers,    // ← added by useZodForm
-} = useZodForm(schema, options);
+  onSubmit,   // ← added by useForm
+  helpers,    // ← added by useForm
+} = useForm(schema, options);
 ```
 
-#### Added by `useZodForm`
+#### Added by `useForm`
 
 | Property | Description |
 |---|---|
@@ -373,7 +373,7 @@ const {
 ### Pre-filling a form for editing
 
 ```tsx
-const { register, onSubmit } = useZodForm(userSchema, {
+const { register, onSubmit } = useForm(userSchema, {
   endpoint:      `/api/users/${userId}`,
   method:        'PUT',
   defaultValues: existingUser,  // pre-populates every field
@@ -387,7 +387,7 @@ const { register, onSubmit } = useZodForm(userSchema, {
 ### Transforming the payload before submission
 
 ```tsx
-const { register, onSubmit } = useZodForm(signupSchema, {
+const { register, onSubmit } = useForm(signupSchema, {
   endpoint:  '/api/auth/signup',
   transform: (data) => ({
     ...data,
@@ -397,7 +397,7 @@ const { register, onSubmit } = useZodForm(signupSchema, {
     deviceId: getDeviceFingerprint(),
   }),
   responseHandlers: [
-    whenStatusCode(422, (res, { setError }) => applyLaravelErrors(res.data, setError)),
+    whenStatusCode(422, (res, { setError }) => doSomething(res.data, setError)),
     whenSuccess(() => router.push('/dashboard')),
   ],
 });
@@ -406,7 +406,7 @@ const { register, onSubmit } = useZodForm(signupSchema, {
 ### Global loading indicator with `onBeforeSubmit` / `onAfterSubmit`
 
 ```tsx
-const { register, onSubmit } = useZodForm(schema, {
+const { register, onSubmit } = useForm(schema, {
   endpoint:       '/api/data',
   onBeforeSubmit: () => globalLoadingStore.setLoading(true),
   onAfterSubmit:  () => globalLoadingStore.setLoading(false),
@@ -424,7 +424,7 @@ const uploadSchema = z.object({
   file:  z.instanceof(File),
 });
 
-const { register, onSubmit } = useZodForm(uploadSchema, {
+const { register, onSubmit } = useForm(uploadSchema, {
   endpoint: '/api/upload',
   method:   'POST',
   // oku detects the File and sends multipart/form-data automatically
@@ -440,7 +440,7 @@ const { register, onSubmit } = useZodForm(uploadSchema, {
 Use `submit` to plug in any async function — fetch, axios, GraphQL, a mock — as long as it returns a `ResponseLike` object.
 
 ```tsx
-const { register, onSubmit } = useZodForm(schema, {
+const { register, onSubmit } = useForm(schema, {
   submit: async (payload) => {
     const res = await axios.post('/api/login', payload);
     return {
@@ -465,7 +465,7 @@ Because handlers are plain objects (`{ detect, handle }`), you can define them o
 import { whenStatusCode, whenStatusRange } from '@sirmekus/kwado';
 
 export const handleValidationErrors = (setError) =>
-  whenStatusCode(422, (res) => applyLaravelErrors(res.data, setError));
+  whenStatusCode(422, (res) => doSomething(res.data, setError));
 
 export const reportServerErrors =
   whenStatusRange(500, 599, (res) => Sentry.captureMessage(res.data?.message));
@@ -478,10 +478,10 @@ export const handleSessionExpiry =
 // In any form — setError is received as a helper argument, not closed over
 import { reportServerErrors, handleSessionExpiry } from '@/lib/formHandlers';
 
-const { register, onSubmit } = useZodForm(schema, {
+const { register, onSubmit } = useForm(schema, {
   endpoint: '/api/resource',
   responseHandlers: [
-    whenStatusCode(422, (res, { setError }) => applyLaravelErrors(res.data, setError)),
+    whenStatusCode(422, (res, { setError }) => doSomething(res.data, setError)),
     reportServerErrors,
     handleSessionExpiry,
     whenSuccess(() => toast.success('Saved!')),
@@ -501,7 +501,7 @@ const schema = z.object({
   password: z.string().min(8),
 });
 
-const { register, formState: { errors } } = useZodForm(schema, { ... });
+const { register, formState: { errors } } = useForm(schema, { ... });
 
 // errors.email     — fully typed, no 'any'
 // errors.password  — fully typed
@@ -517,7 +517,7 @@ interface LoginResponse {
   message: string;
 }
 
-const { onSubmit } = useZodForm<typeof loginSchema['shape'], LoginResponse>(loginSchema, {
+const { onSubmit } = useForm<typeof loginSchema['shape'], LoginResponse>(loginSchema, {
   endpoint: '/api/auth/login',
   responseHandlers: [
     whenSuccess<LoginResponse>((res) => {
@@ -538,7 +538,7 @@ oku resolves on 2xx and **rejects** on non-2xx HTTP responses and network failur
 - **Non-2xx HTTP response** — oku rejects with a `ResponseObject`. The hook detects the shape (`status`, `statusCode`, `data`) and feeds it through the `responseHandlers` pipeline as normal, so `whenStatusCode(422, ...)`, `whenError(...)`, etc. all work without any extra handling on your part.
 - **Network failure** (connection refused, timeout) — the error is a plain `Error` object with no `status` / `statusCode`. The hook detects this and calls `onError` directly, bypassing the pipeline.
 
-You never need to write a `try/catch` around `useZodForm`.
+You never need to write a `try/catch` around `useForm`.
 
 ---
 

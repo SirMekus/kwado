@@ -1,4 +1,4 @@
-export { useZodForm } from './useZodForm';
+export { useForm } from './useForm';
 
 export {
   whenStatusCode,
@@ -14,5 +14,5 @@ export type {
   FormHelpers,
   ResponseLike,
   ResponseHandler,
-  UseZodFormOptions,
+  UseFormOptions,
 } from './types';

@@ -1,10 +1,10 @@
 import { useMemo } from 'react';
-import { useForm } from 'react-hook-form';
+import { useForm as useRHForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { get as okuGet, post as okuPost } from '@sirmekus/oku';
 import type { ZodObject, ZodRawShape, z } from 'zod';
 import type { DefaultValues, SubmitHandler } from 'react-hook-form';
-import type { FormHelpers, ResponseLike, UseZodFormOptions } from './types';
+import type { FormHelpers, ResponseLike, UseFormOptions } from './types';
 
 /**
  * Combines Zod schema validation, react-hook-form state management, and oku
@@ -33,7 +33,7 @@ import type { FormHelpers, ResponseLike, UseZodFormOptions } from './types';
  * });
  *
  * function LoginForm() {
- *   const { register, onSubmit, formState: { errors, isSubmitting } } = useZodForm(
+ *   const { register, onSubmit, formState: { errors, isSubmitting } } = useForm(
  *     loginSchema,
  *     {
  *       endpoint: '/api/auth/login',
@@ -55,13 +55,13 @@ import type { FormHelpers, ResponseLike, UseZodFormOptions } from './types';
  * }
  * ```
  */
-export function useZodForm<T extends ZodRawShape>(
+export function useForm<T extends ZodRawShape>(
   schema: ZodObject<T>,
-  options: UseZodFormOptions<z.infer<ZodObject<T>>> = {},
+  options: UseFormOptions<z.infer<ZodObject<T>>> = {},
 ) {
   type TForm = z.infer<typeof schema>;
 
-  const form = useForm<TForm>({
+  const form = useRHForm<TForm>({
     resolver: zodResolver(schema),
     defaultValues: options.defaultValues as DefaultValues<TForm>,
   });

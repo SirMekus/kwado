@@ -42,7 +42,7 @@ export interface ResponseHandler<TData = unknown, TForm extends FieldValues = Fi
   ) => void | Promise<void>;
 }
 
-export interface UseZodFormOptions<TForm extends FieldValues, TResponse = unknown> {
+export interface UseFormOptions<TForm extends FieldValues, TResponse = unknown> {
   /**
    * Target URL for the built-in oku HTTP call.
    * Ignored when `submit` is provided.
