@@ -1,0 +1,14 @@
+# Source
+src/
+
+# Config
+tsconfig.json
+tsup.config.ts
+.gitignore
+
+# Dependencies
+node_modules/
+
+# Logs
+*.log
+npm-debug.log*
