@@ -2,7 +2,7 @@ import { useMemo } from 'react';
 import { useForm as useRHForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { get as okuGet, post as okuPost } from '@sirmekus/oku';
-import type { ZodObject, ZodRawShape, z } from 'zod';
+import type { ZodTypeAny, z } from 'zod';
 import type { DefaultValues, SubmitHandler } from 'react-hook-form';
 import type { FormHelpers, ResponseLike, UseFormOptions } from './types';
 
@@ -16,7 +16,7 @@ import type { FormHelpers, ResponseLike, UseFormOptions } from './types';
  * logic declaratively — handlers are matched in order and the first one that
  * fires short-circuits the rest.
  *
- * @param schema  A Zod object schema describing the form's data shape.
+ * @param schema  A Zod schema describing the form's data shape (object, refined, etc.).
  * @param options Submission target, lifecycle hooks, and response handlers.
  *
  * @returns Everything from `useForm` plus:
@@ -55,11 +55,11 @@ import type { FormHelpers, ResponseLike, UseFormOptions } from './types';
  * }
  * ```
  */
-export function useForm<T extends ZodRawShape>(
-  schema: ZodObject<T>,
-  options: UseFormOptions<z.infer<ZodObject<T>>> = {},
+export function useForm<S extends ZodTypeAny>(
+  schema: S,
+  options: UseFormOptions<z.infer<S>> = {},
 ) {
-  type TForm = z.infer<typeof schema>;
+  type TForm = z.infer<S>;
 
   const form = useRHForm<TForm>({
     resolver: zodResolver(schema),

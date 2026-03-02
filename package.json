@@ -1,6 +1,6 @@
 {
   "name": "@sirmekus/kwado",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Unify Zod validation, react-hook-form, and oku HTTP submission in one hook — with an extensible response-handler pipeline.",
   "keywords": [
     "react",
